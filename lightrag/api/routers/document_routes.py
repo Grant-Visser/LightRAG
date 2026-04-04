@@ -1849,6 +1849,10 @@ async def run_scanning_process(
 
                 await pipeline_index_files(rag, valid_files, track_id)
 
+                # Reset busy status after completion
+                async with pipeline_status_lock:
+                    pipeline_status["busy"] = False
+
                 if processed_files:
                     logger.info(
                         f"Scanning process completed: {len(valid_files)} files Processed {len(processed_files)} skipped."

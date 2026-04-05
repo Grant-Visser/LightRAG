@@ -1824,34 +1824,7 @@ async def run_scanning_process(
 
             # Process valid files (new files + non-PROCESSED status files)
             if valid_files:
-                # Update pipeline_status to reflect the scan job starting
-                async with pipeline_status_lock:
-                    if not pipeline_status.get("busy", False):
-                        scan_start_msg = (
-                            f"Document scan started: {len(valid_files)} file(s) to index"
-                        )
-                        pipeline_status.update(
-                            {
-                                "busy": True,
-                                "job_name": "Document Scan",
-                                "job_start": datetime.now(timezone.utc).isoformat(),
-                                "docs": len(valid_files),
-                                "batchs": len(valid_files),
-                                "cur_batch": 0,
-                                "request_pending": False,
-                                "cancellation_requested": False,
-                                "latest_message": scan_start_msg,
-                            }
-                        )
-                        del pipeline_status["history_messages"][:]
-                        pipeline_status["history_messages"].append(scan_start_msg)
-                        logger.info(scan_start_msg)
-
                 await pipeline_index_files(rag, valid_files, track_id)
-
-                # Reset busy status after completion
-                async with pipeline_status_lock:
-                    pipeline_status["busy"] = False
 
                 if processed_files:
                     logger.info(
